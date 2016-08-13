@@ -1,0 +1,138 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudFormation template for creating an EMR cluster with Spark",
+  "Parameters": {
+    "AdditionalMasterSecurityGroups": {
+      "Default": "sg-b2cf85d6,sg-d74453b3",
+      "Type": "CommaDelimitedList"
+    },
+    "AdditionalSlaveSecurityGroups": {
+      "Default": "sg-b2cf85d6,sg-d74453b3",
+      "Type": "CommaDelimitedList"
+    },
+    "ClusterName": {
+      "Default": "my-spark-cluster",
+      "Type": "String"
+    },
+    "CoreInstanceBidPrice": {
+      "Default": 0.09,
+      "Type": "Number"
+    },
+    "CoreInstanceCount": {
+      "Default": 3,
+      "Type": "Number"
+    },
+    "CoreInstanceType": {
+      "Default": "m3.2xlarge",
+      "Type": "String"
+    },
+    "LogS3Bucket": {
+      "Default": "datawithoutborders",
+      "Type": "String"
+    },
+    "NotebookS3Bucket": {
+      "Default": "datawithoutborders",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "EmrCluster": {
+      "Type": "AWS::EMR::Cluster",
+      "Properties": {
+        "Applications": [
+          {
+            "Name": "Spark"
+          },
+          {
+            "Name": "Zeppelin"
+          }
+        ],
+        "Configurations": [
+          {
+            "Classification": "spark",
+            "Properties": {
+              "maximizeResourceAllocation": "true"
+            }
+          }
+        ],
+        "Instances": {
+          "AdditionalMasterSecurityGroups": {
+            "Ref": "AdditionalMasterSecurityGroups"
+          },
+          "AdditionalSlaveSecurityGroups": {
+            "Ref": "AdditionalSlaveSecurityGroups"
+          },
+          "CoreInstanceGroup": {
+            "BidPrice": {
+              "Ref": "CoreInstanceBidPrice"
+            },
+            "InstanceCount": {
+              "Ref": "CoreInstanceCount"
+            },
+            "InstanceType": {
+              "Ref": "CoreInstanceType"
+            },
+            "Market": "SPOT",
+            "Name": "Core"
+          },
+          "Ec2KeyName": "ansible_ec2",
+          "MasterInstanceGroup": {
+            "Configurations": {
+              "Classification": "zeppelin-env",
+              "Configurations": [
+                {
+                  "Classification": "export",
+                  "Properties": {
+                    "ZEPPELIN_NOTEBOOK_S3_BUCKET": {
+                      "Ref": "NotebookS3Bucket"
+                    },
+                    "ZEPPELIN_NOTEBOOK_S3_USER": "zeppelin",
+                    "ZEPPELIN_NOTEBOOK_STORAGE": "org.apache.zeppelin.notebook.repo.S3NotebookRepo"
+                  }
+                }
+              ],
+              "Properties": {}
+            },
+            "InstanceCount": 1,
+            "InstanceType": "m3.large",
+            "Market": "ON_DEMAND",
+            "Name": "Master"
+          }
+        },
+        "JobFlowRole": "EMR_EC2_DefaultRole",
+        "LogUri": {
+          "Fn::Join": [
+            "/",
+            [
+              "s3:/",
+              {
+                "Ref": "LogS3Bucket"
+              },
+              "logs",
+              {
+                "Ref": "ClusterName"
+              }
+            ]
+          ]
+        },
+        "Name": {
+          "Ref": "ClusterName"
+        },
+        "ReleaseLabel": "emr-5.0.0",
+        "ServiceRole": "EMR_DefaultRole",
+        "Tags": [
+          {
+            "Key": "Service",
+            "Value": "EMR"
+          },
+          {
+            "Key": "Cluster",
+            "Value": {
+              "Ref": "ClusterName"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
