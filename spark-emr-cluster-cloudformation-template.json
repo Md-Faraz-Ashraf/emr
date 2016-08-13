@@ -37,7 +37,6 @@
   },
   "Resources": {
     "EmrCluster": {
-      "Type": "AWS::EMR::Cluster",
       "Properties": {
         "Applications": [
           {
@@ -50,7 +49,7 @@
         "Configurations": [
           {
             "Classification": "spark",
-            "Properties": {
+            "ConfigurationProperties": {
               "maximizeResourceAllocation": "true"
             }
           }
@@ -77,24 +76,25 @@
           },
           "Ec2KeyName": "ansible_ec2",
           "MasterInstanceGroup": {
-            "Configurations": {
-              "Classification": "zeppelin-env",
-              "Configurations": [
-                {
-                  "Classification": "export",
-                  "Properties": {
-                    "ZEPPELIN_NOTEBOOK_S3_BUCKET": {
-                      "Ref": "NotebookS3Bucket"
-                    },
-                    "ZEPPELIN_NOTEBOOK_S3_USER": "zeppelin",
-                    "ZEPPELIN_NOTEBOOK_STORAGE": "org.apache.zeppelin.notebook.repo.S3NotebookRepo"
+            "Configurations": [
+              {
+                "Classification": "zeppelin-env",
+                "Configurations": [
+                  {
+                    "Classification": "export",
+                    "ConfigurationProperties": {
+                      "ZEPPELIN_NOTEBOOK_S3_BUCKET": {
+                        "Ref": "NotebookS3Bucket"
+                      },
+                      "ZEPPELIN_NOTEBOOK_S3_USER": "zeppelin",
+                      "ZEPPELIN_NOTEBOOK_STORAGE": "org.apache.zeppelin.notebook.repo.S3NotebookRepo"
+                    }
                   }
-                }
-              ],
-              "Properties": {}
-            },
+                ]
+              }
+            ],
             "InstanceCount": 1,
-            "InstanceType": "m3.large",
+            "InstanceType": "m1.large",
             "Market": "ON_DEMAND",
             "Name": "Master"
           }
@@ -132,7 +132,8 @@
             }
           }
         ]
-      }
+      },
+      "Type": "AWS::EMR::Cluster"
     }
   }
 }
