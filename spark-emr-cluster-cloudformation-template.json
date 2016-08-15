@@ -33,6 +33,10 @@
     "NotebookS3Bucket": {
       "Default": "datawithoutborders",
       "Type": "String"
+    },
+    "ZeppelinSparkSubmitOptions": {
+      "Default": "\"--repositories http://repo.npa.institute.s3-website-eu-west-1.amazonaws.com/release --packages ml.dmlc:xgboost4j-spark:0.5\"",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -83,6 +87,9 @@
                   {
                     "Classification": "export",
                     "ConfigurationProperties": {
+                      "SPARK_SUBMIT_OPTIONS": {
+                        "Ref": "ZeppelinSparkSubmitOptions"
+                      },
                       "ZEPPELIN_NOTEBOOK_S3_BUCKET": {
                         "Ref": "NotebookS3Bucket"
                       },
